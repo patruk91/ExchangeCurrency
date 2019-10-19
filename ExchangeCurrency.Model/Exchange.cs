@@ -47,6 +47,23 @@ namespace ExchangeCurrency.Model
 
             return stringBuilder.ToString();
         }
+
+        public string GetExchangeRates(string currentExchangeRates)
+        {
+            var exchangeRates = JArray.Parse(currentExchangeRates);
+            var currencies = exchangeRates.First["rates"];
+            var stringBuilder = new StringBuilder();
+
+            foreach (var currency in currencies)
+            {
+                stringBuilder.Append(currency["code"]);
+                stringBuilder.Append(":");
+                stringBuilder.Append(currency["mid"]);
+                stringBuilder.Append("\n");
+            }
+
+            return stringBuilder.ToString();
+        }
     }
 
 
