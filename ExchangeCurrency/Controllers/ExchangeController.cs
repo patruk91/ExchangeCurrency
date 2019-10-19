@@ -7,33 +7,30 @@ namespace ExchangeCurrency.Controllers
     [ApiController]
     public class ExchangeController : ControllerBase
     {
-        private readonly IExchange _nbpHandler;
-        private readonly string _codeCurrencies;
+        private readonly IExchange _exchange;
+        private readonly string _codesForExchangeRates;
 
-        public ExchangeController(IExchange nbpHandler, string codeCurrencies)
+        public ExchangeController(IExchange exchange, string codesForExchangeRates)
         {
-            _nbpHandler = nbpHandler;
-            _codeCurrencies = codeCurrencies;
+            _exchange = exchange;
+            _codesForExchangeRates = codesForExchangeRates;
         }
 
-
         [HttpGet]
-        public string Get()
+        public string GetCodesForCurrencies()
         {
-            const string message = "Available currencies for conversions:\n";
-            return message + _codeCurrencies;
+            const string message = "Available code currencies for conversions:\n";
+            return message + _codesForExchangeRates;
         }
 
         [HttpGet (template:"{rates}")]
-        public string GetCurrencyRates()
+        public string GetRatesForCurrencies()
         {
             const string message = "Current exchange rates (currency to PLN):\n";
-            var currentExchangeRates = _nbpHandler.GetCurrentExchangeRates(ApiBankConfiguration.UriStringToNbpApi,
+            var exchangeRatesData = _exchange.GetExchangeRatesData(ApiBankConfiguration.UriStringToNbpApi,
                 ApiBankConfiguration.RequestUriToGetCurrentExchangeRates).Result;
-            var exchangeRates = _nbpHandler.GetExchangeRates(currentExchangeRates);
+            var exchangeRates = _exchange.GetExchangeRates(exchangeRatesData);
             return message + exchangeRates;
         }
-
-
     }
 }
