@@ -30,6 +30,23 @@ namespace ExchangeCurrency.Model
             }
             return exchangeRates.Result;
         }
+
+        public string GetCodeCurrencies(string currentExchangeRates)
+        {
+            var exchangeRates = JArray.Parse(currentExchangeRates);
+            var currencies = exchangeRates.First["rates"];
+            var stringBuilder = new StringBuilder();
+
+            var prefix = "";
+            foreach (var currency in currencies)
+            {
+                stringBuilder.Append(prefix);
+                prefix = ",";
+                stringBuilder.Append(currency["code"]);
+            }
+
+            return stringBuilder.ToString();
+        }
     }
 
 
