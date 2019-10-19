@@ -24,6 +24,16 @@ namespace ExchangeCurrency.Controllers
             return message + _codeCurrencies;
         }
 
-        
+        [HttpGet (template:"{rates}")]
+        public string GetCurrencyRates()
+        {
+            const string message = "Current exchange rates (currency to PLN):\n";
+            var currentExchangeRates = _nbpHandler.GetCurrentExchangeRates(ApiBankConfiguration.UriStringToNbpApi,
+                ApiBankConfiguration.RequestUriToGetCurrentExchangeRates).Result;
+            var exchangeRates = _nbpHandler.GetExchangeRates(currentExchangeRates);
+            return message + exchangeRates;
+        }
+
+
     }
 }
