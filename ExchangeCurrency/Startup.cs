@@ -24,11 +24,11 @@ namespace ExchangeCurrency
 
         private static void ConfigureBankServices(IServiceCollection services)
         {
-            IExchange nbpHandler = new Exchange();
-            var currentExchangeRates = nbpHandler.GetCurrentExchangeRates(ApiBankConfiguration.UriStringToNbpApi,
+            IExchange exchange = new Exchange();
+            var exchangeData = exchange.GetExchangeRatesData(ApiBankConfiguration.UriStringToNbpApi,
                 ApiBankConfiguration.RequestUriToGetCurrentExchangeRates).Result;
-            var codeCurrencies = nbpHandler.GetCodeCurrencies(currentExchangeRates);
-            services.Add(new ServiceDescriptor(typeof(IExchange), nbpHandler));
+            var codeCurrencies = exchange.GetCodesForExchangeRates(exchangeData);
+            services.Add(new ServiceDescriptor(typeof(IExchange), exchange));
             services.Add(new ServiceDescriptor(typeof(string), codeCurrencies));
         }
 

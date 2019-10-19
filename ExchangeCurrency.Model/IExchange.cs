@@ -4,8 +4,8 @@ namespace ExchangeCurrency.Model
 {
     public interface IExchange
     {
-        Task<string> GetCurrentExchangeRates(string uriString, string requestUri);
-        string GetCodeCurrencies(string currentExchangeRates);
+        Task<string> GetExchangeRatesData(string uriString, string requestUri);
+        string GetCodesForExchangeRates(string currentExchangeRates);
         string GetExchangeRates(string currentExchangeRates);
     }
 }

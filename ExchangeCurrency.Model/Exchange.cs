@@ -9,7 +9,14 @@ namespace ExchangeCurrency.Model
 {
     public class Exchange : IExchange
     {
-        public async Task<string> GetCurrentExchangeRates(string uriString, string requestUri)
+        private readonly StringBuilder _stringBuilder;
+
+        public Exchange()
+        {
+            this._stringBuilder = new StringBuilder();
+        }
+
+        public async Task<string> GetExchangeRatesData(string uriString, string requestUri)
         {
             Task<string> exchangeRates;
             using (var client = new HttpClient())
@@ -31,38 +38,50 @@ namespace ExchangeCurrency.Model
             return exchangeRates.Result;
         }
 
-        public string GetCodeCurrencies(string currentExchangeRates)
+        public string GetCodesForExchangeRates(string exchangeData)
         {
-            var exchangeRates = JArray.Parse(currentExchangeRates);
-            var currencies = exchangeRates.First["rates"];
-            var stringBuilder = new StringBuilder();
+            _stringBuilder.Clear();
+            var currencies = GetCurrenciesData(exchangeData);
+            AddCodes(currencies);
 
+            return _stringBuilder.ToString();
+        }
+
+        private void AddCodes(JToken currencies)
+        {
             var prefix = "";
             foreach (var currency in currencies)
             {
-                stringBuilder.Append(prefix);
+                _stringBuilder.Append(prefix);
                 prefix = ",";
-                stringBuilder.Append(currency["code"]);
+                _stringBuilder.Append(currency["code"]);
             }
-
-            return stringBuilder.ToString();
         }
 
-        public string GetExchangeRates(string currentExchangeRates)
+        public string GetExchangeRates(string exchangeData)
         {
-            var exchangeRates = JArray.Parse(currentExchangeRates);
-            var currencies = exchangeRates.First["rates"];
-            var stringBuilder = new StringBuilder();
+            _stringBuilder.Clear();
+            var currencies = GetCurrenciesData(exchangeData);
+            AddExchangeRates(currencies);
 
+            return _stringBuilder.ToString();
+        }
+
+        private void AddExchangeRates(JToken currencies)
+        {
             foreach (var currency in currencies)
             {
-                stringBuilder.Append(currency["code"]);
-                stringBuilder.Append(":");
-                stringBuilder.Append(currency["mid"]);
-                stringBuilder.Append("\n");
+                _stringBuilder.Append(currency["code"]);
+                _stringBuilder.Append(":");
+                _stringBuilder.Append(currency["mid"]);
+                _stringBuilder.Append("\n");
             }
+        }
 
-            return stringBuilder.ToString();
+        private JToken GetCurrenciesData(string currentExchangeData)
+        {
+            var exchangeData = JArray.Parse(currentExchangeData);
+            return exchangeData.First["rates"];
         }
     }
 
