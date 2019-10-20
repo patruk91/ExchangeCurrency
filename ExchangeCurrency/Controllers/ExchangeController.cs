@@ -32,5 +32,19 @@ namespace ExchangeCurrency.Controllers
             var exchangeRates = _exchange.GetExchangeRates(exchangeRatesData);
             return message + exchangeRates;
         }
+
+        [HttpGet(template: "{amount}/{fromCurrency}/{toCurrency}")]
+        public string GetCalculatedExchangeForCurrencies(int amount, string fromCurrency, string toCurrency)
+        {
+            var exchangeRateDataFromCurrency = _exchange.GetExchangeRatesData(ApiBankConfiguration.UriStringToNbpApi,
+                ApiBankConfiguration.RequestUriToGetExchangeRate + "A/" + fromCurrency).Result;
+            var exchangeRateDataToCurrency = _exchange.GetExchangeRatesData(ApiBankConfiguration.UriStringToNbpApi,
+                ApiBankConfiguration.RequestUriToGetExchangeRate + "A/" + toCurrency).Result;
+
+            var calculatedAmount = _exchange.CalculateExchange(amount, exchangeRateDataFromCurrency, exchangeRateDataToCurrency, fromCurrency);
+            var message = $"{amount}{fromCurrency} = {calculatedAmount}{toCurrency}:\n";
+
+            return message;
+        }
     }
 }
