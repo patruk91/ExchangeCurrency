@@ -5,7 +5,6 @@ namespace ExchangeCurrency.Model
 {
     public class ExchangeHelper
     {
-
         public void AddCodes(JToken currencies, StringBuilder stringBuilder)
         {
             var prefix = "";

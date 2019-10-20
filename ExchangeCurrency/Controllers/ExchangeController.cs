@@ -28,13 +28,13 @@ namespace ExchangeCurrency.Controllers
         }
 
         [HttpGet (template:"{rates}")]
-        public string GetRatesForCurrencies()
+        public async Task<string> GetRatesForCurrencies()
         {
             var uriString = ApiBankConfiguration.GetUriLink(ApiBankConfiguration.UriToNbpApi);
             var requestUri = ApiBankConfiguration.GetRequestUri(ApiBankConfiguration.UriToExchangeRates,
                 TableNames.A.ToString());
 
-            var exchangeRatesData = _exchange.GetExchangeRatesData(uriString, requestUri).Result;
+            var exchangeRatesData = await _exchange.GetExchangeRatesData(uriString, requestUri);
             var exchangeRates = _exchange.GetExchangeRates(exchangeRatesData);
 
             const string message = "Current exchange rates (currency to PLN):\n";
@@ -42,7 +42,7 @@ namespace ExchangeCurrency.Controllers
         }
 
         [HttpGet(template: "{amount}/{fromCurrency}/{toCurrency}")]
-        public string GetCalculatedExchangeForCurrencies(int amount, string fromCurrency, string toCurrency)
+        public async Task<string> GetCalculatedExchangeForCurrencies(int amount, string fromCurrency, string toCurrency)
         {
             var uriString = ApiBankConfiguration.GetUriLink(ApiBankConfiguration.UriToNbpApi);
             var requestUriFromCurrency = ApiBankConfiguration.GetRequestUri(ApiBankConfiguration.UriToExchangeRate,
@@ -50,8 +50,8 @@ namespace ExchangeCurrency.Controllers
             var requestUriToCurrency = ApiBankConfiguration.GetRequestUri(ApiBankConfiguration.UriToExchangeRate,
                 TableNames.A.ToString(), toCurrency);
 
-            var dataFromCurrency = _exchange.GetExchangeRatesData(uriString, requestUriFromCurrency).Result;
-            var dataToCurrency = _exchange.GetExchangeRatesData(uriString, requestUriToCurrency).Result;
+            var dataFromCurrency = await _exchange.GetExchangeRatesData(uriString, requestUriFromCurrency);
+            var dataToCurrency = await _exchange.GetExchangeRatesData(uriString, requestUriToCurrency);
 
             var calculatedAmount = _exchange.CalculateExchange(amount, dataFromCurrency, dataToCurrency, fromCurrency);
             var message = $"{amount}{fromCurrency} = {Math.Round(calculatedAmount * amount, decimals:2, MidpointRounding.AwayFromZero)}{toCurrency}:\n";

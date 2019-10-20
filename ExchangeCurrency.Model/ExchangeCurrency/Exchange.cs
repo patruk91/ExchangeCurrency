@@ -61,7 +61,6 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
         public decimal CalculateExchange(int amount, string dataFromCurrency, string dataToCurrency, string currency)
         {
             var toCurrency = _exchangeHelper.GetAverageExchangeRate(dataToCurrency);
-            if (currency.Equals("pln", StringComparison.CurrentCultureIgnoreCase)) { return toCurrency; }
             var fromCurrency = _exchangeHelper.GetAverageExchangeRate(dataFromCurrency);
             return fromCurrency / toCurrency;
         }
