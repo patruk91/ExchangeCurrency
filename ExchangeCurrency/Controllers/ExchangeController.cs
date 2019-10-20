@@ -1,4 +1,8 @@
-﻿using ExchangeCurrency.Model;
+﻿using System;
+using System.Threading.Tasks;
+using ExchangeCurrency.Model;
+using ExchangeCurrency.Model.Enums;
+using ExchangeCurrency.Model.ExchangeCurrency;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExchangeCurrency.Controllers
@@ -24,25 +28,33 @@ namespace ExchangeCurrency.Controllers
         }
 
         [HttpGet (template:"{rates}")]
-        public string GetRatesForCurrencies()
+        public async Task<string> GetRatesForCurrencies()
         {
-            const string message = "Current exchange rates (currency to PLN):\n";
-            var exchangeRatesData = _exchange.GetExchangeRatesData(ApiBankConfiguration.UriStringToNbpApi,
-                ApiBankConfiguration.RequestUriToGetCurrentExchangeRates).Result;
+            var uriString = ApiBankConfiguration.GetUriLink(ApiBankConfiguration.UriToNbpApi);
+            var requestUri = ApiBankConfiguration.GetRequestUri(ApiBankConfiguration.UriToExchangeRates,
+                TableNames.A.ToString());
+
+            var exchangeRatesData = await _exchange.GetExchangeRatesData(uriString, requestUri);
             var exchangeRates = _exchange.GetExchangeRates(exchangeRatesData);
+
+            const string message = "Current exchange rates (currency to PLN):\n";
             return message + exchangeRates;
         }
 
         [HttpGet(template: "{amount}/{fromCurrency}/{toCurrency}")]
-        public string GetCalculatedExchangeForCurrencies(int amount, string fromCurrency, string toCurrency)
+        public async Task<string> GetCalculatedExchangeForCurrencies(int amount, string fromCurrency, string toCurrency)
         {
-            var exchangeRateDataFromCurrency = _exchange.GetExchangeRatesData(ApiBankConfiguration.UriStringToNbpApi,
-                ApiBankConfiguration.RequestUriToGetExchangeRate + "A/" + fromCurrency).Result;
-            var exchangeRateDataToCurrency = _exchange.GetExchangeRatesData(ApiBankConfiguration.UriStringToNbpApi,
-                ApiBankConfiguration.RequestUriToGetExchangeRate + "A/" + toCurrency).Result;
+            var uriString = ApiBankConfiguration.GetUriLink(ApiBankConfiguration.UriToNbpApi);
+            var requestUriFromCurrency = ApiBankConfiguration.GetRequestUri(ApiBankConfiguration.UriToExchangeRate,
+                TableNames.A.ToString(), fromCurrency);
+            var requestUriToCurrency = ApiBankConfiguration.GetRequestUri(ApiBankConfiguration.UriToExchangeRate,
+                TableNames.A.ToString(), toCurrency);
 
-            var calculatedAmount = _exchange.CalculateExchange(amount, exchangeRateDataFromCurrency, exchangeRateDataToCurrency, fromCurrency);
-            var message = $"{amount}{fromCurrency} = {calculatedAmount}{toCurrency}:\n";
+            var dataFromCurrency = await _exchange.GetExchangeRatesData(uriString, requestUriFromCurrency);
+            var dataToCurrency = await _exchange.GetExchangeRatesData(uriString, requestUriToCurrency);
+
+            var calculatedAmount = _exchange.CalculateExchange(amount, dataFromCurrency, dataToCurrency, fromCurrency);
+            var message = $"{amount}{fromCurrency} = {Math.Round(calculatedAmount * amount, decimals:2, MidpointRounding.AwayFromZero)}{toCurrency}:\n";
 
             return message;
         }

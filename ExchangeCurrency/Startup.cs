@@ -1,4 +1,7 @@
-﻿using ExchangeCurrency.Model;
+﻿using System.Text;
+using ExchangeCurrency.Model;
+using ExchangeCurrency.Model.Enums;
+using ExchangeCurrency.Model.ExchangeCurrency;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -24,9 +27,15 @@ namespace ExchangeCurrency
 
         private static void ConfigureBankServices(IServiceCollection services)
         {
-            IExchange exchange = new Exchange();
-            var exchangeData = exchange.GetExchangeRatesData(ApiBankConfiguration.UriStringToNbpApi,
-                ApiBankConfiguration.RequestUriToGetCurrentExchangeRates).Result;
+            StringBuilder stringBuilder = new StringBuilder();
+            ExchangeHelper exchangeHelper = new ExchangeHelper();
+            IExchange exchange = new Exchange(exchangeHelper, stringBuilder);
+
+            var uriString = ApiBankConfiguration.GetUriLink(ApiBankConfiguration.UriToNbpApi);
+            var requestUri = ApiBankConfiguration.GetRequestUri(ApiBankConfiguration.UriToExchangeRates,
+                TableNames.A.ToString());
+
+            var exchangeData = exchange.GetExchangeRatesData(uriString, requestUri).Result;
             var codeCurrencies = exchange.GetCodesForExchangeRates(exchangeData);
             services.Add(new ServiceDescriptor(typeof(IExchange), exchange));
             services.Add(new ServiceDescriptor(typeof(string), codeCurrencies));
