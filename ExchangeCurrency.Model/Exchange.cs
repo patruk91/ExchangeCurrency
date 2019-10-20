@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -82,6 +83,22 @@ namespace ExchangeCurrency.Model
         {
             var exchangeData = JArray.Parse(currentExchangeData);
             return exchangeData.First["rates"];
+        }
+
+        public decimal CalculateExchange(int amount, string exchangeRateDataFromCurrency, string exchangeRateDataToCurrency, string currency)
+        {
+            var toCurrency = GetAverageExchangeRate(exchangeRateDataToCurrency);
+            if (currency.Equals("pln", StringComparison.CurrentCultureIgnoreCase)) { return toCurrency; }
+            var fromCurrency = GetAverageExchangeRate(exchangeRateDataFromCurrency);
+            return fromCurrency / toCurrency;
+        }
+
+        private decimal GetAverageExchangeRate(string exchangeRateData)
+        {
+            var currency = JObject.Parse(exchangeRateData);
+            var exchangeData = currency["rates"].First["mid"].ToString();
+            decimal.TryParse(exchangeData, out var value);
+            return value;
         }
     }
 
