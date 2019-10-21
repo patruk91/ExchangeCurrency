@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using ExchangeCurrency.AccessLayer;
@@ -18,9 +20,14 @@ namespace ExchangeCurrency
 {
     public class Startup
     {
+        private readonly string _uriString;
+        private readonly string _requestUri;
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            _uriString = ApiBankConfiguration.GetUriLink(ApiBankConfiguration.UriToNbpApi);
+            _requestUri = ApiBankConfiguration.GetRequestUri(ApiBankConfiguration.UriToExchangeRates,
+                TableNames.A.ToString());
         }
 
         public IConfiguration Configuration { get; }
@@ -30,27 +37,27 @@ namespace ExchangeCurrency
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddDbContext<ExchangeDbEntities>(
                 context => context.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-
-            IConversionDao conversionDao = new ConversionSql();
-            services.Add(new ServiceDescriptor(typeof(IConversionDao), conversionDao));
-            ConfigureBankServices(services);
-        }
-
-        private static void ConfigureBankServices(IServiceCollection services)
-        {
-            StringBuilder stringBuilder = new StringBuilder();
-            ExchangeHelper exchangeHelper = new ExchangeHelper();
+            var stringBuilder = new StringBuilder();
+            var exchangeHelper = new ExchangeHelper();
             IExchange exchange = new Exchange(exchangeHelper, stringBuilder);
 
-            var uriString = ApiBankConfiguration.GetUriLink(ApiBankConfiguration.UriToNbpApi);
-            var requestUri = ApiBankConfiguration.GetRequestUri(ApiBankConfiguration.UriToExchangeRates,
-                TableNames.A.ToString());
+            var statusCode = exchange.GetStatusCode(_uriString, _requestUri).Result.StatusCode;
+            if (statusCode == HttpStatusCode.OK)
+            {
+                ConfigureBankServices(services, exchange);
+            }
+            services.Add(new ServiceDescriptor(typeof(HttpStatusCode), statusCode));
+        }
 
-            var exchangeData = exchange.GetExchangeRatesData(uriString, requestUri).Result;
+        private void ConfigureBankServices(IServiceCollection services,
+                                                IExchange exchange)
+        {
+            IConversionDao conversionDao = new ConversionSql();
+            var exchangeData = exchange.GetExchangeRatesData(_uriString, _requestUri).Result;
             var codeCurrencies = exchange.GetCodesForExchangeRates(exchangeData);
-
             services.Add(new ServiceDescriptor(typeof(IExchange), exchange));
             services.Add(new ServiceDescriptor(typeof(Dictionary<string, int>), codeCurrencies));
+            services.Add(new ServiceDescriptor(typeof(IConversionDao), conversionDao));
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

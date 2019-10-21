@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using ExchangeCurrency.AccessLayer;
 using ExchangeCurrency.AccessLayer.dao;
@@ -19,13 +20,19 @@ namespace ExchangeCurrency.Controllers
         private readonly Dictionary<string, int> _codesForExchangeRates;
         private readonly ExchangeDbEntities _context;
         private readonly IConversionDao _conversionDao;
+        private readonly HttpStatusCode _statusCode;
 
-        public ExchangeController(IExchange exchange, Dictionary<string, int> codesForExchangeRates, ExchangeDbEntities context, IConversionDao conversionDao)
+        public ExchangeController(IExchange exchange,
+                                Dictionary<string, int> codesForExchangeRates,
+                                ExchangeDbEntities context,
+                                IConversionDao conversionDao,
+                                HttpStatusCode statusCode)
         {
             _exchange = exchange;
             _codesForExchangeRates = codesForExchangeRates;
             _context = context;
             _conversionDao = conversionDao;
+            _statusCode = statusCode;
         }
 
         [HttpGet]

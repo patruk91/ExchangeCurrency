@@ -21,6 +21,21 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
             this._stringBuilder = stringBuilder;
         }
 
+        public async Task<HttpResponseMessage> GetStatusCode(string uriString, string requestUri)
+        {
+            HttpResponseMessage response;
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(uriString);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                response = await client.GetAsync(requestUri);
+            }
+            return response;
+        }
+
+
         public async Task<string> GetExchangeRatesData(string uriString, string requestUri)
         {
             Task<string> exchangeRates;
