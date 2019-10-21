@@ -21,6 +21,7 @@ namespace ExchangeCurrency.Controllers
         private readonly ExchangeDbEntities _context;
         private readonly IConversionDao _conversionDao;
         private readonly HttpStatusCode _statusCode;
+        private const int OK = 200;
 
         public ExchangeController(IExchange exchange,
                                 Dictionary<string, int> codesForExchangeRates,
@@ -38,8 +39,12 @@ namespace ExchangeCurrency.Controllers
         [HttpGet]
         public string GetCodesForCurrencies()
         {
-            const string message = "Available code currencies for conversions:\n";
-            return message + string.Join(",",_codesForExchangeRates.Keys);
+            if (_statusCode == HttpStatusCode.OK)
+            {
+                const string message = "Available code currencies for conversions:\n";
+                return message + string.Join(",", _codesForExchangeRates.Keys);
+            }
+            return "Service temporary unavailable. Please try again later.\n";
         }
 
         [HttpGet (template:"{rates}")]

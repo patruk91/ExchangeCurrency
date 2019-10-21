@@ -20,14 +20,18 @@ namespace ExchangeCurrency
 {
     public class Startup
     {
-        private readonly string _uriString;
-        private readonly string _requestUri;
+        private static readonly string UriString = ApiBankConfiguration
+            .GetUriLink(ApiBankConfiguration.UriToNbpApi);
+        private static readonly string RequestUri = ApiBankConfiguration
+            .GetRequestUri(ApiBankConfiguration.UriToExchangeRates,
+            TableNames.A.ToString());
+        private readonly IExchange _exchange;
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            _uriString = ApiBankConfiguration.GetUriLink(ApiBankConfiguration.UriToNbpApi);
-            _requestUri = ApiBankConfiguration.GetRequestUri(ApiBankConfiguration.UriToExchangeRates,
-                TableNames.A.ToString());
+            var stringBuilder = new StringBuilder();
+            var exchangeHelper = new ExchangeHelper();
+            _exchange = new Exchange(exchangeHelper, stringBuilder);
         }
 
         public IConfiguration Configuration { get; }
@@ -37,27 +41,43 @@ namespace ExchangeCurrency
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddDbContext<ExchangeDbEntities>(
                 context => context.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            var stringBuilder = new StringBuilder();
-            var exchangeHelper = new ExchangeHelper();
-            IExchange exchange = new Exchange(exchangeHelper, stringBuilder);
-
-            var statusCode = exchange.GetStatusCode(_uriString, _requestUri).Result.StatusCode;
-            if (statusCode == HttpStatusCode.OK)
-            {
-                ConfigureBankServices(services, exchange);
-            }
-            services.Add(new ServiceDescriptor(typeof(HttpStatusCode), statusCode));
+            var statusCode = _exchange.GetStatusCode(UriString, RequestUri).Result.StatusCode;
+            CodeCurrencies(services, statusCode);
+            BankExchange(services, statusCode);
         }
 
-        private void ConfigureBankServices(IServiceCollection services,
-                                                IExchange exchange)
+        private void CodeCurrencies(IServiceCollection services, HttpStatusCode statusCode)
+        {
+            if (statusCode == HttpStatusCode.OK)
+            {
+                LoadCodeCurrencies(services, _exchange);
+            }
+            else
+            {
+                EmptyCodeCurrencies(services);
+            }
+        }
+
+        private void BankExchange(IServiceCollection services, HttpStatusCode statusCode)
         {
             IConversionDao conversionDao = new ConversionSql();
-            var exchangeData = exchange.GetExchangeRatesData(_uriString, _requestUri).Result;
-            var codeCurrencies = exchange.GetCodesForExchangeRates(exchangeData);
-            services.Add(new ServiceDescriptor(typeof(IExchange), exchange));
-            services.Add(new ServiceDescriptor(typeof(Dictionary<string, int>), codeCurrencies));
+            services.Add(new ServiceDescriptor(typeof(IExchange), _exchange));
+            services.Add(new ServiceDescriptor(typeof(HttpStatusCode), statusCode));
             services.Add(new ServiceDescriptor(typeof(IConversionDao), conversionDao));
+        }
+
+        private void EmptyCodeCurrencies(IServiceCollection services)
+        {
+            var codeCurrencies = new Dictionary<string, int>();
+            services.Add(new ServiceDescriptor(typeof(Dictionary<string, int>), codeCurrencies));
+        }
+
+        private void LoadCodeCurrencies(IServiceCollection services,
+                                                IExchange exchange)
+        {
+            var exchangeData = exchange.GetExchangeRatesData(UriString, RequestUri).Result;
+            var codeCurrencies = exchange.GetCodesForExchangeRates(exchangeData);
+            services.Add(new ServiceDescriptor(typeof(Dictionary<string, int>), codeCurrencies));
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
