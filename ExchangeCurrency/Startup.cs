@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
 using ExchangeCurrency.AccessLayer;
 using ExchangeCurrency.AccessLayer.dao;
 using ExchangeCurrency.AccessLayer.dao.sql;
@@ -28,13 +30,10 @@ namespace ExchangeCurrency
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddDbContext<ExchangeDbEntities>(
                 context => context.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            ICurrencyDao currencyDao = new CurrencySql();
-            ICurrencyDetailsDao currencyDetailsDao = new CurrencyDetailsSql();
-            services.Add(new ServiceDescriptor(typeof(ICurrencyDao), currencyDao));
-            services.Add(new ServiceDescriptor(typeof(ICurrencyDetailsDao), currencyDetailsDao));
 
+            IConversionDao conversionDao = new ConversionSql();
+            services.Add(new ServiceDescriptor(typeof(IConversionDao), conversionDao));
             ConfigureBankServices(services);
-
         }
 
         private static void ConfigureBankServices(IServiceCollection services)
@@ -49,8 +48,9 @@ namespace ExchangeCurrency
 
             var exchangeData = exchange.GetExchangeRatesData(uriString, requestUri).Result;
             var codeCurrencies = exchange.GetCodesForExchangeRates(exchangeData);
+
             services.Add(new ServiceDescriptor(typeof(IExchange), exchange));
-            services.Add(new ServiceDescriptor(typeof(string), codeCurrencies));
+            services.Add(new ServiceDescriptor(typeof(Dictionary<string, int>), codeCurrencies));
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -67,5 +67,7 @@ namespace ExchangeCurrency
             app.UseHttpsRedirection();
             app.UseMvc();
         }
+
+
     }
 }
