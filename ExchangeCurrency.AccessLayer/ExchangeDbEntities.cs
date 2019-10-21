@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ExchangeCurrency.AccessLayer.entityConfiguration;
-using ExchangeCurrency.Model.Models;
+using ExchangeCurrency.ModelExchangeCurrency.Models;
 using Microsoft.Extensions.Configuration;
 
 namespace ExchangeCurrency.AccessLayer
