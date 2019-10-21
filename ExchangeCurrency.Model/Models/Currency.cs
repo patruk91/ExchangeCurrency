@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ExchangeCurrency.Model.Models
+namespace ExchangeCurrency.ModelExchangeCurrency.Models
 {
     public class Currency
     {

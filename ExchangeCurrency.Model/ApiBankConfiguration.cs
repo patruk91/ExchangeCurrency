@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
+using ExchangeCurrency.ModelExchangeCurrency.Enums;
 
-namespace ExchangeCurrency.Model
+namespace ExchangeCurrency.ModelExchangeCurrency
 {
     public static class ApiBankConfiguration
     {
@@ -13,9 +14,9 @@ namespace ExchangeCurrency.Model
             return $"{uriString}/";
         }
 
-        public static string GetRequestUri(string requestUri, string tableName, string currency = "")
+        public static string GetRequestUri(string requestUri, string currency = "")
         {
-            return $"{requestUri}/{tableName}/{currency}";
+            return $"{requestUri}/{TableNames.A.ToString()}/{currency}";
         }
     }
 }
