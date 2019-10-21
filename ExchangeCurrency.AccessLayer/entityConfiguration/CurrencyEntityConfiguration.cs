@@ -1,4 +1,4 @@
-﻿using ExchangeCurrency.Model.Models;
+﻿using ExchangeCurrency.ModelExchangeCurrency.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
