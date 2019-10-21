@@ -9,13 +9,8 @@ namespace ExchangeCurrency.AccessLayer.entityConfiguration
         public void Configure(EntityTypeBuilder<Currency> builder)
         {
             builder
-                .Property(i => i.CurrencyId)
+                .Property(i => i.Id)
                 .ValueGeneratedOnAdd();
-
-            builder.HasOne<CurrencyDetails>(d => d.Details)
-                .WithOne(c => c.Currency)
-                .HasForeignKey<CurrencyDetails>(d => d.CurrencyRef);
-
         }
     }
 }
