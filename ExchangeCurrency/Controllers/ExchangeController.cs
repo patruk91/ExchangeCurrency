@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
+using ExchangeCurrency.AccessLayer;
+using ExchangeCurrency.AccessLayer.dao;
 using ExchangeCurrency.Model;
 using ExchangeCurrency.Model.Enums;
 using ExchangeCurrency.Model.ExchangeCurrency;
+using ExchangeCurrency.Model.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExchangeCurrency.Controllers
@@ -13,11 +16,17 @@ namespace ExchangeCurrency.Controllers
     {
         private readonly IExchange _exchange;
         private readonly string _codesForExchangeRates;
+        private readonly ExchangeDbEntities _context;
+        private ICurrencyDao _currencyDao;
+        private ICurrencyDetailsDao _currencyDetailsDao;
 
-        public ExchangeController(IExchange exchange, string codesForExchangeRates)
+        public ExchangeController(IExchange exchange, string codesForExchangeRates, ExchangeDbEntities context, ICurrencyDao currencyDao, ICurrencyDetailsDao currencyDetailsDao)
         {
             _exchange = exchange;
             _codesForExchangeRates = codesForExchangeRates;
+            _context = context;
+            _currencyDao = currencyDao;
+            _currencyDetailsDao = currencyDetailsDao;
         }
 
         [HttpGet]
@@ -55,6 +64,11 @@ namespace ExchangeCurrency.Controllers
 
             var calculatedAmount = _exchange.CalculateExchange(amount, dataFromCurrency, dataToCurrency, fromCurrency);
             var message = $"{amount}{fromCurrency} = {Math.Round(calculatedAmount * amount, decimals:2, MidpointRounding.AwayFromZero)}{toCurrency}:\n";
+
+            CurrencyDetails currencyDetails = _exchange.GetCurrencyDetails(dataFromCurrency);
+            Currency currency = _exchange.GetCurrency(dataFromCurrency, currencyDetails);
+            await _currencyDao.AddCurrency(currency, _context);
+            //await _currencyDetailsDao.AddCurrencyDetails(currencyDetails, _context);
 
             return message;
         }

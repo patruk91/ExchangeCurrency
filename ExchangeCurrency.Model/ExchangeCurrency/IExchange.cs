@@ -9,7 +9,7 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
         string GetCodesForExchangeRates(string currentExchangeRates);
         string GetExchangeRates(string currentExchangeRates);
         decimal CalculateExchange(int amount, string dataFromCurrency, string dataToCurrency, string fromCurrency);
-        Currency GetCurrency(string exchangeRateData);
+        Currency GetCurrency(string exchangeRateData, CurrencyDetails currencyDetails);
         CurrencyDetails GetCurrencyDetails(string exchangeRateData);
     }
 }

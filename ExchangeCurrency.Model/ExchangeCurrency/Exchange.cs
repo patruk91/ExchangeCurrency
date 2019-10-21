@@ -68,14 +68,14 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
         }
 
 
-        public Currency GetCurrency(string exchangeRateData)
+        public Currency GetCurrency(string exchangeRateData, CurrencyDetails currencyDetails)
         {
             var currencyData = JObject.Parse(exchangeRateData);
             var code = currencyData["code"].ToString();
             var exchangeData = currencyData["rates"].First["mid"].ToString();
             decimal.TryParse(exchangeData, out var exchangeRate);
 
-            return new Currency(code, exchangeRate);
+            return new Currency(code, exchangeRate, currencyDetails);
         }
 
         public CurrencyDetails GetCurrencyDetails(string exchangeRateData)

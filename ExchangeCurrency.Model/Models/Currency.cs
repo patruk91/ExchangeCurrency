@@ -10,11 +10,11 @@
 
         public Currency() { }
 
-        public Currency(string code, decimal exchangeRate)
+        public Currency(string code, decimal exchangeRate, CurrencyDetails details)
         {
             Code = code;
             ExchangeRate = exchangeRate;
+            Details = details;
         }
-
     }
 }
