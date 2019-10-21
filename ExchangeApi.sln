@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.29403.142
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExchangeCurrency", "ExchangeCurrency\ExchangeCurrency.csproj", "{505BC614-C18F-41C1-B396-913C1CCA9E98}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExchangeCurrency.Model", "ExchangeCurrency.Model\ExchangeCurrency.Model.csproj", "{03C7BE68-6C4D-477D-BA30-CD49752B2FDE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExchangeCurrency.Model", "ExchangeCurrency.Model\ExchangeCurrency.Model.csproj", "{03C7BE68-6C4D-477D-BA30-CD49752B2FDE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExchangeCurrency.AccessLayer", "ExchangeCurrency.AccessLayer\ExchangeCurrency.AccessLayer.csproj", "{E2C51279-3A6C-4479-A20B-48A8F3854ECC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{03C7BE68-6C4D-477D-BA30-CD49752B2FDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{03C7BE68-6C4D-477D-BA30-CD49752B2FDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{03C7BE68-6C4D-477D-BA30-CD49752B2FDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2C51279-3A6C-4479-A20B-48A8F3854ECC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2C51279-3A6C-4479-A20B-48A8F3854ECC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2C51279-3A6C-4479-A20B-48A8F3854ECC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2C51279-3A6C-4479-A20B-48A8F3854ECC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
