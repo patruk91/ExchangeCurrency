@@ -4,10 +4,10 @@ using System.Net;
 using System.Threading.Tasks;
 using ExchangeCurrency.AccessLayer;
 using ExchangeCurrency.AccessLayer.dao;
-using ExchangeCurrency.Model;
-using ExchangeCurrency.Model.Enums;
-using ExchangeCurrency.Model.ExchangeCurrency;
-using ExchangeCurrency.Model.Models;
+using ExchangeCurrency.ModelExchangeCurrency;
+using ExchangeCurrency.ModelExchangeCurrency.Enums;
+using ExchangeCurrency.ModelExchangeCurrency.ExchangeCurrency;
+using ExchangeCurrency.ModelExchangeCurrency.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExchangeCurrency.Controllers
@@ -20,20 +20,25 @@ namespace ExchangeCurrency.Controllers
         private readonly Dictionary<string, int> _codesForExchangeRates;
         private readonly ExchangeDbEntities _context;
         private readonly IConversionDao _conversionDao;
+        private readonly ICurrencyDao _currencyDao;
         private readonly HttpStatusCode _statusCode;
-        private const int OK = 200;
+        private readonly ApiConnections _apiConnections;
 
         public ExchangeController(IExchange exchange,
                                 Dictionary<string, int> codesForExchangeRates,
                                 ExchangeDbEntities context,
                                 IConversionDao conversionDao,
-                                HttpStatusCode statusCode)
+                                ICurrencyDao currencyDao,
+                                HttpStatusCode statusCode,
+                                ApiConnections apiConnections)
         {
             _exchange = exchange;
             _codesForExchangeRates = codesForExchangeRates;
             _context = context;
             _conversionDao = conversionDao;
+            _currencyDao = currencyDao;
             _statusCode = statusCode;
+            _apiConnections = apiConnections;
         }
 
         [HttpGet]
@@ -50,11 +55,8 @@ namespace ExchangeCurrency.Controllers
         [HttpGet (template:"{rates}")]
         public async Task<string> GetRatesForCurrencies()
         {
-            var uriString = ApiBankConfiguration.GetUriLink(ApiBankConfiguration.UriToNbpApi);
-            var requestUri = ApiBankConfiguration.GetRequestUri(ApiBankConfiguration.UriToExchangeRates,
-                TableNames.A.ToString());
-
-            var exchangeRatesData = await _exchange.GetExchangeRatesData(uriString, requestUri);
+            var exchangeRatesData = await _exchange.GetExchangeRatesData(_apiConnections.UriString,
+                                                                        _apiConnections.RequestUriAllRates);
             var exchangeRates = _exchange.GetExchangeRates(exchangeRatesData);
 
             const string message = "Current exchange rates (currency to PLN):\n";
@@ -64,19 +66,14 @@ namespace ExchangeCurrency.Controllers
         [HttpGet(template: "{amount}/{fromCurrency}/{toCurrency}")]
         public async Task<string> GetCalculatedExchangeForCurrencies(int amount, string fromCurrency, string toCurrency)
         {
-            var uriString = ApiBankConfiguration.GetUriLink(ApiBankConfiguration.UriToNbpApi);
-            var requestUriFromCurrency = ApiBankConfiguration.GetRequestUri(ApiBankConfiguration.UriToExchangeRate,
-                TableNames.A.ToString(), fromCurrency);
-            var requestUriToCurrency = ApiBankConfiguration.GetRequestUri(ApiBankConfiguration.UriToExchangeRate,
-                TableNames.A.ToString(), toCurrency);
+            var uriString = _apiConnections.UriString;
+            var dataFromCurrency = await _exchange.GetExchangeRatesData(uriString, _apiConnections.RequestUriToSingleRate(fromCurrency));
+            var currencyFrom = _currencyDao.GetCurrency(fromCurrency, _context, _codesForExchangeRates);
 
-            var dataFromCurrency = await _exchange.GetExchangeRatesData(uriString, requestUriFromCurrency);
-            var dataToCurrency = await _exchange.GetExchangeRatesData(uriString, requestUriToCurrency);
+            var dataToCurrency = await _exchange.GetExchangeRatesData(uriString, _apiConnections.RequestUriToSingleRate(toCurrency));
+            var currencyTo = _currencyDao.GetCurrency(toCurrency, _context, _codesForExchangeRates);
 
-            var currencyFrom = _context.Currency.Find(_codesForExchangeRates[fromCurrency]);
-            var currencyTo = _context.Currency.Find(_codesForExchangeRates[toCurrency]);
-
-            var conversions = _exchange.GetConversions(dataFromCurrency, dataToCurrency, amount, currencyFrom, currencyTo);
+            var conversions = _exchange.GetConversionsDetails(dataFromCurrency, dataToCurrency, amount, currencyFrom, currencyTo);
             await _conversionDao.AddConversions(conversions, _context);
 
             return $"{amount}{fromCurrency} = {conversions.Result}{toCurrency}:\n";
