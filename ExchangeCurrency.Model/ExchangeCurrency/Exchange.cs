@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -42,13 +43,18 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
             return exchangeRates.Result;
         }
 
-        public string GetCodesForExchangeRates(string exchangeData)
+        public Dictionary<string, int> GetCodesForExchangeRates(string exchangeData)
         {
             _stringBuilder.Clear();
             var currencies = _exchangeHelper.GetDataForCurrencies(exchangeData);
             _exchangeHelper.AddCodes(currencies, _stringBuilder);
-
-            return _stringBuilder.ToString();
+            var strCodes = _stringBuilder.ToString().Split(",");
+            var codes = new Dictionary<string, int>();
+            for (var i = 0; i < strCodes.Length; i++)
+            {
+                codes.Add(strCodes[i], i + 1);
+            }
+            return codes;
         }
 
         public string GetExchangeRates(string exchangeData)
@@ -67,29 +73,33 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
             return fromCurrency / toCurrency;
         }
 
-
-        public Currency GetCurrency(string exchangeRateData, CurrencyDetails currencyDetails)
+        public Conversions GetConversions(string exchangeRateDataFrom, string exchangeRateDataTo, int amount, Currency currencyFrom, Currency currencyTo)
         {
-            var currencyData = JObject.Parse(exchangeRateData);
-            var code = currencyData["code"].ToString();
-            var exchangeData = currencyData["rates"].First["mid"].ToString();
-            decimal.TryParse(exchangeData, out var exchangeRate);
+            var currencyDataFrom = JObject.Parse(exchangeRateDataFrom);
+            var currencyDataTo = JObject.Parse(exchangeRateDataTo);
+            var effectiveDate = currencyDataFrom["rates"].First["effectiveDate"] + " " + DateTime.Now.ToString("h:mm:ss");
+            var dataTransaction = DateTime.Parse(effectiveDate);
+            
+            var exchangeDataFrom = currencyDataFrom["rates"].First["mid"].ToString();
+            decimal.TryParse(exchangeDataFrom, out var exchangeRateFrom);
+            var exchangeDataTo = currencyDataTo["rates"].First["mid"].ToString();
+            decimal.TryParse(exchangeDataTo, out var exchangeRateTo);
 
-            return new Currency(code, exchangeRate, currencyDetails);
+            var ratio = CalculateRatio(exchangeRateFrom, exchangeRateTo);
+            var result = CalculateResult(amount, ratio);
+
+            return new Conversions(dataTransaction, currencyFrom, amount, currencyTo, result, ratio);
         }
 
-        public CurrencyDetails GetCurrencyDetails(string exchangeRateData)
+        private decimal CalculateRatio(decimal exchangeRateFrom, decimal exchangeRateTo)
         {
-            var currencyData = JObject.Parse(exchangeRateData);
-            Enum.TryParse(currencyData["table"].ToString(), out TableNames table);
-            var currency = currencyData["currency"].ToString();
-            var noBank = currencyData["rates"].First["no"].ToString();
-            var effectiveDate = currencyData["rates"].First["effectiveDate"] + " " + DateTime.Now.ToString("h:mm:ss");
-            DateTime myDate = DateTime.Parse(effectiveDate);
-
-            return new CurrencyDetails(table, currency, noBank, myDate);
+            return exchangeRateFrom / exchangeRateTo;
         }
 
+        private decimal CalculateResult(int amount, decimal ratio)
+        {
+            return Math.Round(ratio * amount, decimals: 2, MidpointRounding.AwayFromZero);
+        }
     }
 
 
