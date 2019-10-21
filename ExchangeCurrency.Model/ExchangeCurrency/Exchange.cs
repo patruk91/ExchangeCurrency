@@ -81,13 +81,6 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
             return _stringBuilder.ToString();
         }
 
-        public decimal CalculateExchange(int amount, string dataFromCurrency, string dataToCurrency, string currency)
-        {
-            var toCurrency = _exchangeHelper.GetAverageExchangeRate(dataToCurrency);
-            var fromCurrency = _exchangeHelper.GetAverageExchangeRate(dataFromCurrency);
-            return fromCurrency / toCurrency;
-        }
-
         public Conversions GetConversions(string exchangeRateDataFrom, string exchangeRateDataTo, int amount, Currency currencyFrom, Currency currencyTo)
         {
             var currencyDataFrom = JObject.Parse(exchangeRateDataFrom);
