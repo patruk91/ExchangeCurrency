@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using ExchangeCurrency.AccessLayer;
+using ExchangeCurrency.AccessLayer.dao;
 using ExchangeCurrency.Model;
 using ExchangeCurrency.Model.Enums;
 using ExchangeCurrency.Model.ExchangeCurrency;
+using ExchangeCurrency.Model.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExchangeCurrency.Controllers
@@ -12,19 +16,23 @@ namespace ExchangeCurrency.Controllers
     public class ExchangeController : ControllerBase
     {
         private readonly IExchange _exchange;
-        private readonly string _codesForExchangeRates;
+        private readonly Dictionary<string, int> _codesForExchangeRates;
+        private readonly ExchangeDbEntities _context;
+        private readonly IConversionDao _conversionDao;
 
-        public ExchangeController(IExchange exchange, string codesForExchangeRates)
+        public ExchangeController(IExchange exchange, Dictionary<string, int> codesForExchangeRates, ExchangeDbEntities context, IConversionDao conversionDao)
         {
             _exchange = exchange;
             _codesForExchangeRates = codesForExchangeRates;
+            _context = context;
+            _conversionDao = conversionDao;
         }
 
         [HttpGet]
         public string GetCodesForCurrencies()
         {
             const string message = "Available code currencies for conversions:\n";
-            return message + _codesForExchangeRates;
+            return message + string.Join(",",_codesForExchangeRates.Keys);
         }
 
         [HttpGet (template:"{rates}")]
@@ -53,10 +61,13 @@ namespace ExchangeCurrency.Controllers
             var dataFromCurrency = await _exchange.GetExchangeRatesData(uriString, requestUriFromCurrency);
             var dataToCurrency = await _exchange.GetExchangeRatesData(uriString, requestUriToCurrency);
 
-            var calculatedAmount = _exchange.CalculateExchange(amount, dataFromCurrency, dataToCurrency, fromCurrency);
-            var message = $"{amount}{fromCurrency} = {Math.Round(calculatedAmount * amount, decimals:2, MidpointRounding.AwayFromZero)}{toCurrency}:\n";
+            var currencyFrom = _context.Currency.Find(_codesForExchangeRates[fromCurrency]);
+            var currencyTo = _context.Currency.Find(_codesForExchangeRates[toCurrency]);
 
-            return message;
+            var conversions = _exchange.GetConversions(dataFromCurrency, dataToCurrency, amount, currencyFrom, currencyTo);
+            await _conversionDao.AddConversions(conversions, _context);
+
+            return $"{amount}{fromCurrency} = {conversions.Result}{toCurrency}:\n";
         }
     }
 }

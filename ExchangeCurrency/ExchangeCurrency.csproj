@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ExchangeCurrency.AccessLayer\ExchangeCurrency.AccessLayer.csproj" />
     <ProjectReference Include="..\ExchangeCurrency.Model\ExchangeCurrency.Model.csproj" />
   </ItemGroup>
 
