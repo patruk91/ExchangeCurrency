@@ -1,20 +1,19 @@
-﻿namespace ExchangeCurrency.Model.Models
+﻿using System.Collections.Generic;
+
+namespace ExchangeCurrency.Model.Models
 {
     public class Currency
     {
-        public int CurrencyId { get; set; }
+        public int Id { get; set; }
         public string Code { get; set; }
-        public decimal ExchangeRate { get; set; }
 
-        public CurrencyDetails Details { get; set; }
+        public List<Conversions> Conversions { get; set; }
 
         public Currency() { }
 
-        public Currency(string code, decimal exchangeRate, CurrencyDetails details)
+        public Currency(string code)
         {
             Code = code;
-            ExchangeRate = exchangeRate;
-            Details = details;
         }
     }
 }
