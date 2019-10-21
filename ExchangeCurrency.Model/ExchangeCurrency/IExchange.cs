@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using ExchangeCurrency.Model.Models;
 
 namespace ExchangeCurrency.Model.ExchangeCurrency
 {
@@ -8,5 +9,7 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
         string GetCodesForExchangeRates(string currentExchangeRates);
         string GetExchangeRates(string currentExchangeRates);
         decimal CalculateExchange(int amount, string dataFromCurrency, string dataToCurrency, string fromCurrency);
+        Currency GetCurrency(string exchangeRateData);
+        CurrencyDetails GetCurrencyDetails(string exchangeRateData);
     }
 }

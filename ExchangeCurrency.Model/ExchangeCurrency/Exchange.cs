@@ -4,6 +4,8 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using ExchangeCurrency.Model.Enums;
+using ExchangeCurrency.Model.Models;
 
 namespace ExchangeCurrency.Model.ExchangeCurrency
 {
@@ -63,6 +65,29 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
             var toCurrency = _exchangeHelper.GetAverageExchangeRate(dataToCurrency);
             var fromCurrency = _exchangeHelper.GetAverageExchangeRate(dataFromCurrency);
             return fromCurrency / toCurrency;
+        }
+
+
+        public Currency GetCurrency(string exchangeRateData)
+        {
+            var currencyData = JObject.Parse(exchangeRateData);
+            var code = currencyData["code"].ToString();
+            var exchangeData = currencyData["rates"].First["mid"].ToString();
+            decimal.TryParse(exchangeData, out var exchangeRate);
+
+            return new Currency(code, exchangeRate);
+        }
+
+        public CurrencyDetails GetCurrencyDetails(string exchangeRateData)
+        {
+            var currencyData = JObject.Parse(exchangeRateData);
+            Enum.TryParse(currencyData["table"].ToString(), out TableNames table);
+            var currency = currencyData["currency"].ToString();
+            var noBank = currencyData["rates"].First["no"].ToString();
+            var effectiveDate = currencyData["rates"].First["effectiveDate"] + " " + DateTime.Now.ToString("h:mm:ss");
+            DateTime myDate = DateTime.Parse(effectiveDate);
+
+            return new CurrencyDetails(table, currency, noBank, myDate);
         }
 
     }
