@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using ExchangeCurrency.AccessLayer;
@@ -42,14 +43,14 @@ namespace ExchangeCurrency.Controllers
         }
 
         [HttpGet]
-        public string GetCodesForCurrencies()
+        public IActionResult GetCodesForCurrencies()
         {
-            if (_statusCode == HttpStatusCode.OK)
+            if (_statusCode == HttpStatusCode.OK && _codesForExchangeRates.Any())
             {
                 const string message = "Available code currencies for conversions:\n";
-                return message + string.Join(",", _codesForExchangeRates.Keys);
+                return Ok(message + string.Join(",", _codesForExchangeRates.Keys));
             }
-            return "Service temporary unavailable. Please try again later.\n";
+            return StatusCode(500, "Service temporary unavailable. Please try again later.\n");
         }
 
         [HttpGet (template:"{rates}")]
