@@ -50,41 +50,33 @@ namespace ExchangeCurrency.Controllers
         [HttpGet]
         public IActionResult GetCodesForCurrencies()
         {
-            SetStatusCode();
-            if (_statusCode != HttpStatusCode.OK) { return GetResponseMessageForError(); }
-
-            if (_statusCode == HttpStatusCode.OK && !_codesForExchangeRates.Any())
+            if (!_codesForExchangeRates.Any())
             {
-                _codesForExchangeRates = _exchangeHelper.LoadCodeCurrencies(_exchange, _apiConnections.UriString,
-                    _apiConnections.RequestUriAllRates);
+                try
+                {
+                    _codesForExchangeRates = _exchangeHelper.LoadCodeCurrencies(_exchange, _apiConnections.UriString,
+                        _apiConnections.RequestUriAllRates);
+                }
+                catch (StatusCodeException e)
+                {
+                    var codeNumber = e.CodeNumber;
+                    StatusCodeResponses.GetResponseMessage(codeNumber);
+                }
             }
             const string message = "Available code currencies for conversions:\n";
             return Ok(message + string.Join(",", _codesForExchangeRates.Keys));
-            
-        }
 
-        private IActionResult GetResponseMessageForError()
-        {
-            var noStatus = (int) _statusCode;
-            var errorMessage = StatusCodeResponses.GetResponseMessage(noStatus);
-            return StatusCode(noStatus, errorMessage);
-        }
-
-        private void SetStatusCode()
-        {
-            _statusCode = _exchange.GetStatusCode(_apiConnections.UriString,
-                _apiConnections.RequestUriAllRates).Result;
         }
 
         [HttpGet (template:"{rates}")]
-        public async Task<string> GetRatesForCurrencies()
+        public async Task<IActionResult> GetRatesForCurrencies()
         {
             var exchangeRatesData = await _exchange.GetExchangeRatesData(_apiConnections.UriString,
                                                                         _apiConnections.RequestUriAllRates);
             var exchangeRates = _exchange.GetExchangeRates(exchangeRatesData);
 
             const string message = "Current exchange rates (currency to PLN):\n";
-            return message + exchangeRates;
+            return Ok(message + exchangeRates);
         }
 
         [HttpGet(template: "{amount}/{fromCurrency}/{toCurrency}")]
