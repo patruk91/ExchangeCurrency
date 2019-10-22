@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ExchangeCurrency.ModelExchangeCurrency.ExchangeCurrency;
 using ExchangeCurrency.ModelExchangeCurrency.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ExchangeCurrency.Model.ExchangeCurrency
 {
@@ -34,16 +35,20 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
 
         public async Task<string> GetExchangeRatesData(string uriString, string requestUri)
         {
-            Task<string> exchangeRates;
+            HttpResponseMessage response;
             using (var client = new HttpClient())
             {
                 client.BaseAddress = new Uri(uriString);
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                var response = await client.GetAsync(requestUri);
-                exchangeRates = response.Content.ReadAsStringAsync();
+                response = await client.GetAsync(requestUri);
+                if (response.IsSuccessStatusCode)
+                {
+                    return response.Content.ReadAsStringAsync().Result;
+                }
             }
-            return exchangeRates.Result;
+            var noCode = (int)response.StatusCode;
+            throw new StatusCodeException(noCode, "Connection Error: to third party API");
         }
 
         public Dictionary<string, int> GetCodesForExchangeRates(string exchangeData)
