@@ -12,6 +12,7 @@ using ExchangeCurrency.ModelExchangeCurrency.Enums;
 using ExchangeCurrency.ModelExchangeCurrency.ExchangeCurrency;
 using ExchangeCurrency.ModelExchangeCurrency.Models;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace ExchangeCurrency.Controllers
 {
@@ -60,8 +61,10 @@ namespace ExchangeCurrency.Controllers
                     return StatusCode(codeNumber, StatusCodeResponses.GetResponseMessage(codeNumber));
                 }
             }
+
+            var codes = JsonConvert.SerializeObject(_codesForExchangeRates.Keys.ToList());
             const string message = "Available code currencies for conversions:\n";
-            return Ok(message + string.Join(",", _codesForExchangeRates.Keys));
+            return Ok(message + string.Join(",", codes));
 
         }
 
