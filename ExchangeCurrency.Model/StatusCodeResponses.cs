@@ -9,7 +9,7 @@
                 case 400:
                     return "Bad request. Please, check your link.\n";
                 case 403:
-                    return "Forbidden. You don't have permission to access this resource.\n'";
+                    return "Forbidden. You don't have permission to access this resource.\n";
                 case 404:
                     return "Not found. Link can be broken or dead. Please, check your link.\n'";
                 case 500:
