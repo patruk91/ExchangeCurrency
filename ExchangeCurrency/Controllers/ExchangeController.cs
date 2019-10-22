@@ -101,13 +101,13 @@ namespace ExchangeCurrency.Controllers
                 var codeNumber = e.CodeNumber;
                 return StatusCode(codeNumber, StatusCodeResponses.GetResponseMessage(codeNumber));
             }
-            var currencyFrom = _currencyDao.GetCurrency(fromCurrency, _context, _codesForExchangeRates);
-            var currencyTo = _currencyDao.GetCurrency(toCurrency, _context, _codesForExchangeRates);
+            var currencyFrom = _currencyDao.GetCurrency(fromCurrency.ToUpper(), _context, _codesForExchangeRates);
+            var currencyTo = _currencyDao.GetCurrency(toCurrency.ToUpper(), _context, _codesForExchangeRates);
 
             var conversions = _exchange.GetConversionsDetails(dataFromCurrency, dataToCurrency, amount, currencyFrom, currencyTo);
             await _conversionDao.AddConversions(conversions, _context);
 
-            return Ok($"{amount}{fromCurrency} = {conversions.Result}{toCurrency}:\n");
+            return Ok($"{amount}{fromCurrency.ToUpper()} = {conversions.Result}{toCurrency.ToUpper()}:\n");
         }
     }
 }
