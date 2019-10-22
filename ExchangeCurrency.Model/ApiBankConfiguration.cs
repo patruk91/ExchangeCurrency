@@ -1,7 +1,6 @@
-﻿using System.Runtime.InteropServices;
-using ExchangeCurrency.ModelExchangeCurrency.Enums;
+﻿using ExchangeCurrency.ModelExchangeCurrency.Enums;
 
-namespace ExchangeCurrency.ModelExchangeCurrency
+namespace ExchangeCurrency.Model
 {
     public static class ApiBankConfiguration
     {
