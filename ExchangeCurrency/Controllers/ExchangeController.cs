@@ -32,7 +32,6 @@ namespace ExchangeCurrency.Controllers
                                 ExchangeDbEntities context,
                                 IConversionDao conversionDao,
                                 ICurrencyDao currencyDao,
-                                HttpStatusCode statusCode,
                                 ApiConnections apiConnections,
                                 ExchangeHelper exchangeHelper)
         {
@@ -69,28 +68,46 @@ namespace ExchangeCurrency.Controllers
         [HttpGet (template:"{rates}")]
         public async Task<IActionResult> GetRatesForCurrencies()
         {
-            var exchangeRatesData = await _exchange.GetExchangeRatesData(_apiConnections.UriString,
-                                                                        _apiConnections.RequestUriAllRates);
+            string exchangeRatesData;
+            try
+            {
+                exchangeRatesData = await _exchange.GetExchangeRatesData(_apiConnections.UriString,
+                    _apiConnections.RequestUriAllRates);
+            }
+            catch (StatusCodeException e)
+            {
+                var codeNumber = e.CodeNumber;
+                return StatusCode(codeNumber, StatusCodeResponses.GetResponseMessage(codeNumber));
+            }
             var exchangeRates = _exchange.GetExchangeRates(exchangeRatesData);
-
             const string message = "Current exchange rates (currency to PLN):\n";
+
             return Ok(message + exchangeRates);
         }
 
         [HttpGet(template: "{amount}/{fromCurrency}/{toCurrency}")]
-        public async Task<string> GetCalculatedExchangeForCurrencies(int amount, string fromCurrency, string toCurrency)
+        public async Task<IActionResult> GetCalculatedExchangeForCurrencies(int amount, string fromCurrency, string toCurrency)
         {
             var uriString = _apiConnections.UriString;
-            var dataFromCurrency = await _exchange.GetExchangeRatesData(uriString, _apiConnections.RequestUriToSingleRate(fromCurrency));
+            string dataFromCurrency;
+            string dataToCurrency;
+            try
+            {
+                dataFromCurrency = await _exchange.GetExchangeRatesData(uriString, _apiConnections.RequestUriToSingleRate(fromCurrency));
+                dataToCurrency = await _exchange.GetExchangeRatesData(uriString, _apiConnections.RequestUriToSingleRate(toCurrency));
+            }
+            catch (StatusCodeException e)
+            {
+                var codeNumber = e.CodeNumber;
+                return StatusCode(codeNumber, StatusCodeResponses.GetResponseMessage(codeNumber));
+            }
             var currencyFrom = _currencyDao.GetCurrency(fromCurrency, _context, _codesForExchangeRates);
-
-            var dataToCurrency = await _exchange.GetExchangeRatesData(uriString, _apiConnections.RequestUriToSingleRate(toCurrency));
             var currencyTo = _currencyDao.GetCurrency(toCurrency, _context, _codesForExchangeRates);
 
             var conversions = _exchange.GetConversionsDetails(dataFromCurrency, dataToCurrency, amount, currencyFrom, currencyTo);
             await _conversionDao.AddConversions(conversions, _context);
 
-            return $"{amount}{fromCurrency} = {conversions.Result}{toCurrency}:\n";
+            return Ok($"{amount}{fromCurrency} = {conversions.Result}{toCurrency}:\n");
         }
     }
 }

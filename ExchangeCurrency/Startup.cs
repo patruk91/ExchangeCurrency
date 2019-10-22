@@ -61,7 +61,6 @@ namespace ExchangeCurrency
             try
             {
                 codeCurrencies = _exchangeHelper.LoadCodeCurrencies(_exchange, _uriString, _requestUriAllRates);
-
             }
             catch (StatusCodeException e)
             {
