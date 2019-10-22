@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using ExchangeCurrency.AccessLayer;
 using ExchangeCurrency.AccessLayer.dao;
 using ExchangeCurrency.AccessLayer.dao.sql;
@@ -96,7 +94,5 @@ namespace ExchangeCurrency
             app.UseHttpsRedirection();
             app.UseMvc();
         }
-
-
     }
 }

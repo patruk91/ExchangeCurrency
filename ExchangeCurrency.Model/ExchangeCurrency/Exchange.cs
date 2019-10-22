@@ -65,7 +65,6 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
             var currencies = _exchangeHelper.GetDataForCurrencies(exchangeData);
             return _exchangeHelper.GetExchangeRates(currencies); ;
         }
-
         public Conversions GetConversionsDetails(string exchangeRateDataFrom, string exchangeRateDataTo, int amount, Currency currencyFrom, Currency currencyTo)
         {
             var currencyDataFrom = _exchangeHelper.ParseToJObject(exchangeRateDataFrom);
