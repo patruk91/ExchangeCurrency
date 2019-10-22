@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ExchangeCurrency.ModelExchangeCurrency.ExchangeCurrency;
 using Newtonsoft.Json.Linq;
 
 namespace ExchangeCurrency.Model.ExchangeCurrency
@@ -78,6 +79,17 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
         public JObject ParseToJObject(string exchangeRateDataFrom)
         {
             return JObject.Parse(exchangeRateDataFrom); ;
+        }
+
+        public Dictionary<string, int> LoadEmptyCodeCurrencies()
+        {
+            return new Dictionary<string, int>();
+        }
+
+        public Dictionary<string, int> LoadCodeCurrencies(IExchange exchange, string uriString, string requestUriAllRates)
+        {
+            var exchangeData = exchange.GetExchangeRatesData(uriString, requestUriAllRates).Result;
+            return exchange.GetCodesForExchangeRates(exchangeData);
         }
     }
 }
