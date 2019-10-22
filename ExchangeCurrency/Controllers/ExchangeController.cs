@@ -112,7 +112,9 @@ namespace ExchangeCurrency.Controllers
             var conversions = _exchange.GetConversionsDetails(dataFromCurrency, dataToCurrency, amount, currencyFrom, currencyTo);
             await _conversionDao.AddConversions(conversions, _context);
 
-            return Ok($"{amount}{fromCurrency.ToUpper()} = {conversions.Result}{toCurrency.ToUpper()}:\n");
+            var actualConversion = $"{amount}{fromCurrency.ToUpper()}:{conversions.Result}{toCurrency.ToUpper()}";
+            var currency = JsonConvert.SerializeObject(actualConversion);
+            return Ok(currency);
         }
     }
 }
