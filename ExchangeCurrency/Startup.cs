@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using ExchangeCurrency.AccessLayer;
 using ExchangeCurrency.AccessLayer.dao;
 using ExchangeCurrency.AccessLayer.dao.sql;
 using ExchangeCurrency.Model;
 using ExchangeCurrency.Model.ExchangeCurrency;
 using ExchangeCurrency.ModelExchangeCurrency;
-using ExchangeCurrency.ModelExchangeCurrency.Enums;
 using ExchangeCurrency.ModelExchangeCurrency.ExchangeCurrency;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -18,7 +15,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace ExchangeCurrency
 {
@@ -55,31 +51,32 @@ namespace ExchangeCurrency
             services.AddDbContext<ExchangeDbEntities>(
                 context => context.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             var statusCode = _exchange.GetStatusCode(_uriString, _requestUriAllRates).Result;
-            ConfigureCurrenciesCode(services, statusCode);
-            ConfigureBankExchange(services, statusCode);
+            ConfigureCurrenciesCode(services);
+            ConfigureBankExchange(services);
         }
 
-        private void ConfigureCurrenciesCode(IServiceCollection services, HttpStatusCode statusCode)
+        private void ConfigureCurrenciesCode(IServiceCollection services)
         {
-            if (statusCode == HttpStatusCode.OK)
+            var codeCurrencies = new Dictionary<string, int>();
+            try
             {
-                var codeCurrencies = _exchangeHelper.LoadCodeCurrencies(_exchange, _uriString, _requestUriAllRates);
-                services.Add(new ServiceDescriptor(typeof(Dictionary<string, int>), codeCurrencies));
+                codeCurrencies = _exchangeHelper.LoadCodeCurrencies(_exchange, _uriString, _requestUriAllRates);
+
             }
-            else
+            catch (StatusCodeException e)
             {
-                var codeCurrencies = _exchangeHelper.LoadEmptyCodeCurrencies();
-                services.Add(new ServiceDescriptor(typeof(Dictionary<string, int>), codeCurrencies));
+                var codeNumber = e.CodeNumber;
+                Console.WriteLine(codeNumber + e.Message);
             }
+            services.Add(new ServiceDescriptor(typeof(Dictionary<string, int>), codeCurrencies));
         }
 
-        private void ConfigureBankExchange(IServiceCollection services, HttpStatusCode statusCode)
+        private void ConfigureBankExchange(IServiceCollection services)
         {
 
             IConversionDao conversionDao = new ConversionSql();
             ICurrencyDao currencyDao = new CurrencySql();
             services.Add(new ServiceDescriptor(typeof(IExchange), _exchange));
-            services.Add(new ServiceDescriptor(typeof(HttpStatusCode), statusCode));
             services.Add(new ServiceDescriptor(typeof(IConversionDao), conversionDao));
             services.Add(new ServiceDescriptor(typeof(ICurrencyDao), currencyDao));
             services.Add(new ServiceDescriptor(typeof(ApiConnections), _apiConnections));

@@ -24,7 +24,6 @@ namespace ExchangeCurrency.Controllers
         private readonly ExchangeDbEntities _context;
         private readonly IConversionDao _conversionDao;
         private readonly ICurrencyDao _currencyDao;
-        private HttpStatusCode _statusCode;
         private readonly ApiConnections _apiConnections;
         private readonly ExchangeHelper _exchangeHelper;
 
@@ -42,7 +41,6 @@ namespace ExchangeCurrency.Controllers
             _context = context;
             _conversionDao = conversionDao;
             _currencyDao = currencyDao;
-            _statusCode = statusCode;
             _apiConnections = apiConnections;
             _exchangeHelper = exchangeHelper;
         }
@@ -60,7 +58,7 @@ namespace ExchangeCurrency.Controllers
                 catch (StatusCodeException e)
                 {
                     var codeNumber = e.CodeNumber;
-                    StatusCodeResponses.GetResponseMessage(codeNumber);
+                    return StatusCode(codeNumber, StatusCodeResponses.GetResponseMessage(codeNumber));
                 }
             }
             const string message = "Available code currencies for conversions:\n";
