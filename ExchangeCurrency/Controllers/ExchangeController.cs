@@ -12,6 +12,7 @@ using ExchangeCurrency.ModelExchangeCurrency.Enums;
 using ExchangeCurrency.ModelExchangeCurrency.ExchangeCurrency;
 using ExchangeCurrency.ModelExchangeCurrency.Models;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace ExchangeCurrency.Controllers
 {
@@ -60,8 +61,10 @@ namespace ExchangeCurrency.Controllers
                     return StatusCode(codeNumber, StatusCodeResponses.GetResponseMessage(codeNumber));
                 }
             }
+
+            var codes = JsonConvert.SerializeObject(_codesForExchangeRates.Keys.ToList());
             const string message = "Available code currencies for conversions:\n";
-            return Ok(message + string.Join(",", _codesForExchangeRates.Keys));
+            return Ok(message + string.Join(",", codes));
 
         }
 
@@ -82,7 +85,9 @@ namespace ExchangeCurrency.Controllers
             var exchangeRates = _exchange.GetExchangeRates(exchangeRatesData);
             const string message = "Current exchange rates (currency to PLN):\n";
 
-            return Ok(message + exchangeRates);
+            var actualRates = _exchangeHelper.GetActualRates(exchangeRates);
+            var codes = JsonConvert.SerializeObject(actualRates);
+            return Ok(message + codes);
         }
 
         [HttpGet(template: "{amount}/{fromCurrency}/{toCurrency}")]
@@ -107,7 +112,9 @@ namespace ExchangeCurrency.Controllers
             var conversions = _exchange.GetConversionsDetails(dataFromCurrency, dataToCurrency, amount, currencyFrom, currencyTo);
             await _conversionDao.AddConversions(conversions, _context);
 
-            return Ok($"{amount}{fromCurrency.ToUpper()} = {conversions.Result}{toCurrency.ToUpper()}:\n");
+            var actualConversion = $"{amount}{fromCurrency.ToUpper()}:{conversions.Result}{toCurrency.ToUpper()}";
+            var currency = JsonConvert.SerializeObject(actualConversion);
+            return Ok(currency);
         }
     }
 }

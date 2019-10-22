@@ -41,10 +41,10 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
                 stringBuilder.Append(currency["code"]);
                 stringBuilder.Append(":");
                 stringBuilder.Append(currency["mid"]);
-                stringBuilder.Append("\n");
+                stringBuilder.Append(" ");
             }
 
-            return stringBuilder.ToString();
+            return stringBuilder.ToString().TrimEnd();
         }
 
         public JToken GetDataForCurrencies(string exchangeRateData)
@@ -66,7 +66,7 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
         public decimal GetExchangeRate(JObject currencyData)
         {
             var exchangeDataFrom = currencyData["rates"].First["mid"].ToString();
-            decimal.TryParse(exchangeDataFrom, out var exchangeRateFrom);
+            Decimal.TryParse(exchangeDataFrom, out var exchangeRateFrom);
             return exchangeRateFrom;
         }
 
@@ -90,6 +90,20 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
         {
             var exchangeData = exchange.GetExchangeRatesData(uriString, requestUriAllRates).Result;
             return exchange.GetCodesForExchangeRates(exchangeData);
+        }
+
+        public Dictionary<string, decimal> GetActualRates(string exchangeRates)
+        {
+            var actualRates = new Dictionary<string, decimal>();
+            foreach (var line in exchangeRates.Split(" "))
+            {
+                var data = line.Split(":");
+                var code = data[0];
+                decimal.TryParse(data[1], out var value);
+                actualRates.Add(code, value);
+            }
+
+            return actualRates;
         }
     }
 }
