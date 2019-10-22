@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -18,7 +19,7 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
             this._exchangeHelper = exchangeHelper;
         }
 
-        public async Task<HttpResponseMessage> GetStatusCode(string uriString, string requestUri)
+        public async Task<HttpStatusCode> GetStatusCode(string uriString, string requestUri)
         {
             HttpResponseMessage response;
             using (var client = new HttpClient())
@@ -28,7 +29,7 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 response = await client.GetAsync(requestUri);
             }
-            return response;
+            return response.StatusCode;
         }
 
         public async Task<string> GetExchangeRatesData(string uriString, string requestUri)
@@ -74,5 +75,7 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
 
             return new Conversions(dataTransaction, currencyFrom, amount, currencyTo, result, ratio);
         }
+
+
     }
 }
