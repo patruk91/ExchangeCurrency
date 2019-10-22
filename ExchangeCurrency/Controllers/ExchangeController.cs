@@ -85,7 +85,9 @@ namespace ExchangeCurrency.Controllers
             var exchangeRates = _exchange.GetExchangeRates(exchangeRatesData);
             const string message = "Current exchange rates (currency to PLN):\n";
 
-            return Ok(message + exchangeRates);
+            var actualRates = _exchangeHelper.GetActualRates(exchangeRates);
+            var codes = JsonConvert.SerializeObject(actualRates);
+            return Ok(message + codes);
         }
 
         [HttpGet(template: "{amount}/{fromCurrency}/{toCurrency}")]
