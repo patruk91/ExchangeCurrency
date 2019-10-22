@@ -1,16 +1,18 @@
 ﻿using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
-using ExchangeCurrency.Model.Models;
+using ExchangeCurrency.ModelExchangeCurrency.Models;
 
-namespace ExchangeCurrency.Model.ExchangeCurrency
+namespace ExchangeCurrency.ModelExchangeCurrency.ExchangeCurrency
 {
     public interface IExchange
     {
         Task<string> GetExchangeRatesData(string uriString, string requestUri);
         Dictionary<string, int> GetCodesForExchangeRates(string currentExchangeRates);
         string GetExchangeRates(string currentExchangeRates);
-        decimal CalculateExchange(int amount, string dataFromCurrency, string dataToCurrency, string fromCurrency);
-        Conversions GetConversions(string exchangeRateDataFrom, string exchangeRateDataTo, int amount,
+        Conversions GetConversionsDetails(string exchangeRateDataFrom, string exchangeRateDataTo, int amount,
             Currency currencyFrom, Currency currencyTo);
+        Task<HttpStatusCode> GetStatusCode(string uriString, string requestUri);
     }
 }

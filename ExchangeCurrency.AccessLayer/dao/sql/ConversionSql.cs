@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using ExchangeCurrency.Model.Models;
+using ExchangeCurrency.ModelExchangeCurrency.Models;
 
 namespace ExchangeCurrency.AccessLayer.dao.sql
 {

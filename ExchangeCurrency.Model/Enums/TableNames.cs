@@ -1,4 +1,4 @@
-﻿namespace ExchangeCurrency.Model.Enums
+﻿namespace ExchangeCurrency.ModelExchangeCurrency.Enums
 {
     public enum TableNames
     {

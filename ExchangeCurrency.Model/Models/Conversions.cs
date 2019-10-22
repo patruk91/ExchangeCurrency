@@ -1,7 +1,7 @@
 ﻿using System;
-using ExchangeCurrency.Model.Enums;
+using ExchangeCurrency.ModelExchangeCurrency.Enums;
 
-namespace ExchangeCurrency.Model.Models
+namespace ExchangeCurrency.ModelExchangeCurrency.Models
 {
     public class Conversions
     {
