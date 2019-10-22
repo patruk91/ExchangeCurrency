@@ -35,9 +35,8 @@ namespace ExchangeCurrency
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            var stringBuilder = new StringBuilder();
             var exchangeHelper = new ExchangeHelper();
-            _exchange = new Exchange(exchangeHelper, stringBuilder);
+            _exchange = new Exchange(exchangeHelper);
             _apiConnections = new ApiConnections()
             {
                 UriString = _uriString,

@@ -12,12 +12,10 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
     public class Exchange : IExchange
     {
         private readonly ExchangeHelper _exchangeHelper;
-        private readonly StringBuilder _stringBuilder;
 
-        public Exchange(ExchangeHelper exchangeHelper, StringBuilder stringBuilder)
+        public Exchange(ExchangeHelper exchangeHelper)
         {
             this._exchangeHelper = exchangeHelper;
-            this._stringBuilder = stringBuilder;
         }
 
         public async Task<HttpResponseMessage> GetStatusCode(string uriString, string requestUri)
@@ -49,10 +47,8 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
 
         public Dictionary<string, int> GetCodesForExchangeRates(string exchangeData)
         {
-            _stringBuilder.Clear();
             var currencies = _exchangeHelper.GetDataForCurrencies(exchangeData);
-            _exchangeHelper.AddCodes(currencies, _stringBuilder);
-            var strCodes = _stringBuilder.ToString().Split(",");
+            var strCodes = _exchangeHelper.GetCodes(currencies).Split(",");
             var codes = _exchangeHelper.AddCodes(strCodes);
 
             return codes;
@@ -60,11 +56,8 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
 
         public string GetExchangeRates(string exchangeData)
         {
-            _stringBuilder.Clear();
             var currencies = _exchangeHelper.GetDataForCurrencies(exchangeData);
-            _exchangeHelper.AddExchangeRates(currencies, _stringBuilder);
-
-            return _stringBuilder.ToString();
+            return _exchangeHelper.GetExchangeRates(currencies); ;
         }
 
         public Conversions GetConversionsDetails(string exchangeRateDataFrom, string exchangeRateDataTo, int amount, Currency currencyFrom, Currency currencyTo)

@@ -7,8 +7,9 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
 {
     public class ExchangeHelper
     {
-        public void AddCodes(JToken currencies, StringBuilder stringBuilder)
+        public string GetCodes(JToken currencies)
         {
+            var stringBuilder = new StringBuilder();
             var prefix = "";
             foreach (var currency in currencies)
             {
@@ -16,6 +17,8 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
                 prefix = ",";
                 stringBuilder.Append(currency["code"]);
             }
+
+            return stringBuilder.ToString();
         }
 
         public Dictionary<string, int> AddCodes(string[] strCodes)
@@ -29,8 +32,9 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
             return codes;
         }
 
-        public void AddExchangeRates(JToken currencies, StringBuilder stringBuilder)
+        public string GetExchangeRates(JToken currencies)
         {
+            var stringBuilder = new StringBuilder();
             foreach (var currency in currencies)
             {
                 stringBuilder.Append(currency["code"]);
@@ -38,6 +42,8 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
                 stringBuilder.Append(currency["mid"]);
                 stringBuilder.Append("\n");
             }
+
+            return stringBuilder.ToString();
         }
 
         public JToken GetDataForCurrencies(string exchangeRateData)
