@@ -5,6 +5,8 @@ using System.Net;
 using System.Threading.Tasks;
 using ExchangeCurrency.AccessLayer;
 using ExchangeCurrency.AccessLayer.dao;
+using ExchangeCurrency.Model;
+using ExchangeCurrency.Model.ExchangeCurrency;
 using ExchangeCurrency.ModelExchangeCurrency;
 using ExchangeCurrency.ModelExchangeCurrency.Enums;
 using ExchangeCurrency.ModelExchangeCurrency.ExchangeCurrency;
@@ -18,12 +20,13 @@ namespace ExchangeCurrency.Controllers
     public class ExchangeController : ControllerBase
     {
         private readonly IExchange _exchange;
-        private readonly Dictionary<string, int> _codesForExchangeRates;
+        private Dictionary<string, int> _codesForExchangeRates;
         private readonly ExchangeDbEntities _context;
         private readonly IConversionDao _conversionDao;
         private readonly ICurrencyDao _currencyDao;
-        private readonly HttpStatusCode _statusCode;
+        private HttpStatusCode _statusCode;
         private readonly ApiConnections _apiConnections;
+        private readonly ExchangeHelper _exchangeHelper;
 
         public ExchangeController(IExchange exchange,
                                 Dictionary<string, int> codesForExchangeRates,
@@ -31,7 +34,8 @@ namespace ExchangeCurrency.Controllers
                                 IConversionDao conversionDao,
                                 ICurrencyDao currencyDao,
                                 HttpStatusCode statusCode,
-                                ApiConnections apiConnections)
+                                ApiConnections apiConnections,
+                                ExchangeHelper exchangeHelper)
         {
             _exchange = exchange;
             _codesForExchangeRates = codesForExchangeRates;
@@ -40,17 +44,36 @@ namespace ExchangeCurrency.Controllers
             _currencyDao = currencyDao;
             _statusCode = statusCode;
             _apiConnections = apiConnections;
+            _exchangeHelper = exchangeHelper;
         }
 
         [HttpGet]
         public IActionResult GetCodesForCurrencies()
         {
-            if (_statusCode == HttpStatusCode.OK && _codesForExchangeRates.Any())
+            SetStatusCode();
+            if (_statusCode != HttpStatusCode.OK) { return GetResponseMessageForError(); }
+
+            if (_statusCode == HttpStatusCode.OK && !_codesForExchangeRates.Any())
             {
-                const string message = "Available code currencies for conversions:\n";
-                return Ok(message + string.Join(",", _codesForExchangeRates.Keys));
+                _codesForExchangeRates = _exchangeHelper.LoadCodeCurrencies(_exchange, _apiConnections.UriString,
+                    _apiConnections.RequestUriAllRates);
             }
-            return StatusCode(500, "Service temporary unavailable. Please try again later.\n");
+            const string message = "Available code currencies for conversions:\n";
+            return Ok(message + string.Join(",", _codesForExchangeRates.Keys));
+            
+        }
+
+        private IActionResult GetResponseMessageForError()
+        {
+            var noStatus = (int) _statusCode;
+            var errorMessage = StatusCodeResponses.GetResponseMessage(noStatus);
+            return StatusCode(noStatus, errorMessage);
+        }
+
+        private void SetStatusCode()
+        {
+            _statusCode = _exchange.GetStatusCode(_apiConnections.UriString,
+                _apiConnections.RequestUriAllRates).Result;
         }
 
         [HttpGet (template:"{rates}")]
