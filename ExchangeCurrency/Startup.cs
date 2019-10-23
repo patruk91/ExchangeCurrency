@@ -39,6 +39,7 @@ namespace ExchangeCurrency
                 RequestUriAllRates = _requestUriAllRates,
                 RequestUriSingleRate = _requestUriSingleRate
             };
+            
         }
 
         public IConfiguration Configuration { get; }
