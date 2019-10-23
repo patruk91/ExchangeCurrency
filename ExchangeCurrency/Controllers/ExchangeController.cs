@@ -45,6 +45,8 @@ namespace ExchangeCurrency.Controllers
             _exchangeHelper = exchangeHelper;
         }
 
+        [Route("/")]
+        [Route("/exchange")]
         [HttpGet]
         public IActionResult GetCodesForCurrencies()
         {
