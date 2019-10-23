@@ -6,8 +6,10 @@ using Newtonsoft.Json.Linq;
 
 namespace ExchangeCurrency.Model.ExchangeCurrency
 {
+    //TODO 1 Refactor class is need.Split to single responsibility.
     public class ExchangeHelper
     {
+        //TODO 1 New method implementation is need. See test.
         public string GetCodes(JToken currencies)
         {
             var stringBuilder = new StringBuilder();
@@ -33,6 +35,7 @@ namespace ExchangeCurrency.Model.ExchangeCurrency
             return codes;
         }
 
+        //TODO 1 New method implementation is need. See test.
         public string GetExchangeRates(JToken currencies)
         {
             var stringBuilder = new StringBuilder();
