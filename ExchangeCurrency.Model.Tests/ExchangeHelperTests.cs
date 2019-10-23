@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using ExchangeCurrency.Model.ExchangeCurrency;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
@@ -61,5 +62,72 @@ namespace ExchangeCurrency.Model.Tests
             Assert.Throws<ArgumentNullException>(() =>
                 _exchangeHelper.GetCodes(JToken.Parse(null)));
         }
+
+        [Test]
+        public void CheckDataCodesWhenFormatDataIsCorrect()
+        {
+            // Arrange
+            var expected = new Dictionary<string, int>
+            {
+                {"THB", 1},
+                {"USD", 2},
+                {"CZK", 3},
+            };
+            var codes = new[] {"THB", "USD", "CZK"};
+            // Act
+            var actual = _exchangeHelper.AddCodes(codes);
+            // Assert
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void CheckSizeWhenFormatDataIsCorrect()
+        {
+            // Arrange
+            var expected = 3;
+            var codes = new[] { "THB", "USD", "CZK" };
+            // Act
+            var actual = _exchangeHelper.AddCodes(codes).Count;
+            // Assert
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void CheckDataCodesIfAreNotNull()
+        {
+            // Arrange
+            var codes = new[] { "THB", "USD", "CZK" };
+            // Act
+            var actual = _exchangeHelper.AddCodes(codes);
+            // Assert
+            Assert.That(actual, Is.Not.Null);
+        }
+
+        [Test]
+        public void CheckDataCodesWhenFormatDataIsEmpty()
+        {
+            // Arrange
+            var expected = new Dictionary<string, int>
+            {
+                {"THB", 1},
+                {"USD", 2},
+                {"CZK", 3},
+            };
+            var codes = new[] { "THB", "USD", "CZK" };
+            // Act
+            var actual = _exchangeHelper.AddCodes(codes);
+            // Assert
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void CheckDataCodesWhenFormatDataIsNull()
+        {
+            // Assert
+            Assert.Throws<NullReferenceException>(() =>
+                _exchangeHelper.AddCodes(null));
+        }
+
+
     }
 }
