@@ -128,6 +128,54 @@ namespace ExchangeCurrency.Model.Tests
                 _exchangeHelper.AddCodes(null));
         }
 
+        [Test]
+        public void CheckExchangeRatesWhenFormatDataIsCorrect()
+        {
+            // Arrange
+            var expected = "THB:0.1267 USD:3.8408 AUD:2.6355";
+            var templateDataCurrency = @"[{""currency"": ""bat (Tajlandia)"",""code"": ""THB"",""mid"": 0.1267},
+                                        {""currency"": ""dolar amerykañski"",""code"": ""USD"",""mid"": 3.8408},
+                                        {""currency"": ""dolar australijski"",""code"": ""AUD"",""mid"": 2.6355}]";
+            // Act
+            var actual = _exchangeHelper.GetExchangeRates(JToken.Parse(templateDataCurrency));
+            // Assert
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void CheckExchangeRatesWhenFormatDataIsEmpty()
+        {
+            // Arrange
+            var expected = "";
+            var templateDataCurrency = @"[]";
+            // Act
+            var actual = _exchangeHelper.GetCodes(JToken.Parse(templateDataCurrency));
+            // Assert
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void CheckExchangeRatesWhenFormatDataIsNotComplete()
+        {
+            // Arrange
+            var expected = "THB:0.1267 AUD:2.6355";
+            var templateDataCurrency = @"[{""currency"": ""bat (Tajlandia)"",""code"": ""THB"",""mid"": 0.1267},
+                                        {""currency"": ""dolar amerykañski"",""code"": ""USD""},
+                                        {""code"": ""AUD"",""mid"": 2.6355}]";
+            // Act
+            var actual = _exchangeHelper.GetExchangeRates(JToken.Parse(templateDataCurrency));
+            // Assert
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void ThrowArgumentNullExceptionForExchangeRatesWhenFormatDataIsNull()
+        {
+            // Assert
+            Assert.Throws<ArgumentNullException>(() =>
+                _exchangeHelper.GetExchangeRates(JToken.Parse(null)));
+        }
+
 
     }
 }
